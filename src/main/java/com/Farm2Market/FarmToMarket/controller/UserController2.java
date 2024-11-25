@@ -21,16 +21,15 @@ public class UserController2 {
 
     }
 
-
-
-    @PostMapping
+    @PostMapping("/register")
     public ResponseEntity<UserDto> saveUser(@RequestBody UserDto userDto) {
         UserDto savedUser = userService.saveUser(userDto);
         return ResponseEntity.status(HttpStatus.CREATED).body(savedUser);
     }
-    @PostMapping("/verify")
-    public String verifyUser(@RequestBody UserDto userDto) {
-        return userService.verify(userDto);
+    @PostMapping("/login")
+    public ResponseEntity<UserDto> verifyUser(@RequestBody UserDto userDto) {
+            UserDto user = userService.verify(userDto);
+            return ResponseEntity.status(HttpStatus.ACCEPTED).body(user);
     }
 
     @DeleteMapping("/{username}")

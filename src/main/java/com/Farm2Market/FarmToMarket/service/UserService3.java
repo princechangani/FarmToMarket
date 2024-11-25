@@ -6,6 +6,8 @@ import com.Farm2Market.FarmToMarket.dto.UserDto;
 import com.Farm2Market.FarmToMarket.entity.Address;
 import com.Farm2Market.FarmToMarket.entity.ProductDetail;
 import com.Farm2Market.FarmToMarket.entity.UserEntity;
+import com.Farm2Market.FarmToMarket.exception.InvalidCredentialsException;
+import com.Farm2Market.FarmToMarket.exception.UserNotFoundException;
 import com.Farm2Market.FarmToMarket.repository.AddressRepository;
 import com.Farm2Market.FarmToMarket.repository.ProductDetailRepository;
 import com.Farm2Market.FarmToMarket.repository.UserRepository;
@@ -14,6 +16,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -59,12 +62,9 @@ public class UserService3 {
         UserEntity userEntity = modelMapper.map(userDto, UserEntity.class);
         userEntity.setProductDetails(new ArrayList<>());
         userEntity.setAddresses(new ArrayList<>());
-
         UserEntity savedUser = userRepository.save(userEntity);
-
         saveProductDetails(userDto.getProductDetailsDto(), savedUser);
         saveAddresses(userDto.getAddressesDto(), savedUser); // Save addresses
-
         return mapToUserDto(savedUser);
     }
 
@@ -130,13 +130,28 @@ public class UserService3 {
 
         return userDto;
     }
-    public String verify(UserDto user) {
-        Authentication authentication = authManager.authenticate(new UsernamePasswordAuthenticationToken(user.getEmail(), user.getPassword()));
-        if (authentication.isAuthenticated()) {
-            return jwtService.generateToken(user.getEmail())  ;
-        } else {
-            return "fail";
+    public UserDto verify(UserDto user) {
+        // Find the user by email
+        UserEntity userEntity = userRepository.findByEmail(user.getEmail())
+                .orElseThrow(() -> new UserNotFoundException("User not found for this Email: " + user.getEmail()));
+
+        try {
+            Authentication authentication = authManager.authenticate(
+                    new UsernamePasswordAuthenticationToken(user.getEmail(), user.getPassword())
+            );
+
+            if (authentication.isAuthenticated()) {
+                String token = jwtService.generateToken(user.getEmail());
+                UserDto userDto = mapToUserDto(userEntity);
+                userDto.setBearerToken(token);
+                return userDto;
+            }
+        } catch (AuthenticationException e) {
+            System.err.println("Authentication failed: " + e.getMessage());
+            throw new InvalidCredentialsException("Invalid email or password");
         }
+
+        throw new RuntimeException("Unexpected error during authentication");
     }
 
 }

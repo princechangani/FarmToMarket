@@ -9,7 +9,6 @@ import org.springframework.stereotype.Service;
 
 import javax.crypto.KeyGenerator;
 import javax.crypto.SecretKey;
-import java.security.Key;
 import java.security.NoSuchAlgorithmException;
 import java.util.Base64;
 import java.util.Date;
@@ -19,11 +18,6 @@ import java.util.function.Function;
 
 @Service
 public class JWTService {
-
-
-
-
-
 
 
     private String secretkey = "";
@@ -40,7 +34,13 @@ public class JWTService {
     }
 
     public String generateToken(String username) {
+
         Map<String, Object> claims = new HashMap<>();
+        claims.put("role", "USER");
+        claims.put("scope", "full-access");
+        claims.put("customClaim1", "value1");
+        claims.put("customClaim2", "value2");
+        claims.put("customClaim3", "value3");
         return Jwts.builder()
                 .claims()
                 .add(claims)
@@ -57,6 +57,7 @@ public class JWTService {
         byte[] keyBytes = Decoders.BASE64.decode(secretkey);
         return Keys.hmacShaKeyFor(keyBytes);
     }
+
     public String extractUserName(String token) {
         return extractClaim(token, Claims::getSubject);
     }
@@ -86,4 +87,5 @@ public class JWTService {
     private Date extractExpiration(String token) {
         return extractClaim(token, Claims::getExpiration);
     }
+
 }

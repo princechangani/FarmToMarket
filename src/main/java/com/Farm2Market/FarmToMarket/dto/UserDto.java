@@ -26,8 +26,7 @@ public class UserDto {
 
     private Long phoneNo;
     private String profile;
-
-
+    private String bearerToken;
     private List<ProductDetailDto> productDetailsDto ;
     private List<AddressDto> addressesDto;
 }

@@ -25,7 +25,7 @@ public class SpringSecurity {
 
 
     private final UserDetailServiceImpl userDetailsService;
-    private  final  JwtFilter jwtFilter;
+    private final JwtFilter jwtFilter;
 
     public SpringSecurity(UserDetailServiceImpl userDetailsService, JwtFilter jwtFilter) {
         this.userDetailsService = userDetailsService;
@@ -36,12 +36,8 @@ public class SpringSecurity {
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
 
         return http.authorizeHttpRequests(request -> request
-                        .requestMatchers("/user2/**").permitAll()
-                        .requestMatchers("/user/**").permitAll()
-                        .requestMatchers("/product-detail/**").permitAll()
-
-                        .requestMatchers("/admin/**").authenticated()
-
+                        .requestMatchers("/user2/login**").permitAll()
+                        .requestMatchers("/user2/register**").permitAll()
                         .anyRequest().authenticated())
                 .httpBasic(Customizer.withDefaults())
                 .csrf(AbstractHttpConfigurer::disable)
@@ -60,13 +56,13 @@ public class SpringSecurity {
         return new BCryptPasswordEncoder();
     }
 
-     @Bean
-    public AuthenticationProvider authenticationProvider(){
-         DaoAuthenticationProvider provider = new DaoAuthenticationProvider();
-         provider.setPasswordEncoder(new BCryptPasswordEncoder());
-         provider.setUserDetailsService(userDetailsService);
-         return  provider;
-     }
+    @Bean
+    public AuthenticationProvider authenticationProvider() {
+        DaoAuthenticationProvider provider = new DaoAuthenticationProvider();
+        provider.setPasswordEncoder(new BCryptPasswordEncoder());
+        provider.setUserDetailsService(userDetailsService);
+        return provider;
+    }
 
     @Bean
     public AuthenticationManager authenticationManager(AuthenticationConfiguration config) throws Exception {

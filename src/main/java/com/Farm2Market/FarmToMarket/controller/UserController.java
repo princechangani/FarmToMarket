@@ -30,7 +30,7 @@ public class UserController {
     @PostMapping
     public ResponseEntity<UserDto> saveUser(@RequestBody UserDto userDto) {
         UserDto savedUser = userService.saveUser(userDto);
-        return ResponseEntity.status(HttpStatus.CREATED).body(savedUser);
+        return ResponseEntity.status(HttpStatus.ACCEPTED).body(savedUser);
     }
 
     @DeleteMapping("/{username}")

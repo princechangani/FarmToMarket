@@ -28,6 +28,8 @@ public class UserEntity {
     private String lastName;
     private Long phoneNo;
     private String profile;
+    private String bearerToken;
+
 
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
