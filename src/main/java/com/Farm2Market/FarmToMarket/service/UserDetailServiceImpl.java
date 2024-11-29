@@ -21,15 +21,8 @@ public class UserDetailServiceImpl implements UserDetailsService {
 
     @Override
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
-        // Find the user by email
         UserEntity user = userRepo.findByEmail(email)
                 .orElseThrow(() -> new UsernameNotFoundException("User not found with email: " + email));
-
-        // Here I'm assuming that the `UserEntity` class has a field that stores the role of the user
-        // If there's a roles list, you can replace "USER" with a dynamic role fetch.
-        // Default role if not set
-
-        // Build and return UserDetails
         return User.builder()
                 .username(user.getEmail())
                 .password(user.getPassword())

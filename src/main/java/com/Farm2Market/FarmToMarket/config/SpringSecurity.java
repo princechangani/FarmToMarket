@@ -1,6 +1,7 @@
 package com.Farm2Market.FarmToMarket.config;
 
 
+import com.Farm2Market.FarmToMarket.exception.CustomAuthenticationEntryPoint;
 import com.Farm2Market.FarmToMarket.service.UserDetailServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -26,10 +27,12 @@ public class SpringSecurity {
 
     private final UserDetailServiceImpl userDetailsService;
     private final JwtFilter jwtFilter;
+    private final CustomAuthenticationEntryPoint customAuthenticationEntryPoint ;
 
-    public SpringSecurity(UserDetailServiceImpl userDetailsService, JwtFilter jwtFilter) {
+    public SpringSecurity(UserDetailServiceImpl userDetailsService, JwtFilter jwtFilter, CustomAuthenticationEntryPoint customAuthenticationEntryPoint) {
         this.userDetailsService = userDetailsService;
         this.jwtFilter = jwtFilter;
+        this.customAuthenticationEntryPoint = customAuthenticationEntryPoint;
     }
 
     @Bean
@@ -38,7 +41,10 @@ public class SpringSecurity {
         return http.authorizeHttpRequests(request -> request
                         .requestMatchers("/user2/login**").permitAll()
                         .requestMatchers("/user2/register**").permitAll()
+                        .requestMatchers("/healthcheck**").permitAll()
                         .anyRequest().authenticated())
+                .exceptionHandling((exceptions) -> exceptions
+                .authenticationEntryPoint(customAuthenticationEntryPoint))
                 .httpBasic(Customizer.withDefaults())
                 .csrf(AbstractHttpConfigurer::disable)
                 .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class)
